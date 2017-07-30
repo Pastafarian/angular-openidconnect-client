@@ -20,6 +20,8 @@ export class AuthInterceptor implements HttpInterceptor {
     return next.handle(req).do(x => {}, (err: any) => {
       if (err instanceof HttpErrorResponse && err.status === 401) {
           this.authService.mgr.signinRedirect();
+      } else{
+        // Redirect to error page
       }
     });
   }

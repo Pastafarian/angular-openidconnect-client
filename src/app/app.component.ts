@@ -14,6 +14,8 @@ export class AppComponent {
   user: any;
   car: Car;
   token: string;
+  tokenExpiry: string;
+  authTime: string;
 
   constructor(private authService: AuthService, private httpService: HttpService) {
 
@@ -22,6 +24,8 @@ export class AppComponent {
         this.authService.mgr.signinRedirect();
       } else {
         this.user = authService.currentUser;
+        this.tokenExpiry = new Date(user.expires_at * 1000).toLocaleString();
+        this.authTime = new Date(user.profile.auth_time * 1000).toLocaleString();
         this.token = user.access_token;
       }
     });
