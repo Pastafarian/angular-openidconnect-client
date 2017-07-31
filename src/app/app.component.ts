@@ -3,19 +3,23 @@ import { environment } from '../environments/environment';
 import { AuthService } from './shared/services/auth.service';
 import { CustomAuthService } from './shared/services/custom.auth.service';
 import { HttpService } from './shared/services/http.service';
+import { SilentRefreshService } from './shared/services/silent.refresh.service';
 import { StorageService } from './shared/services/storage.service';
 import { OpenIdConfiguration } from './shared/config/openid.configuration';
 import {NgModule} from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable} from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/do';
+import "rxjs/add/observable/interval";
+import {Idle, DEFAULT_INTERRUPTSOURCES} from '@ng-idle/core';
+import {Keepalive} from '@ng-idle/keepalive';
 
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
-  providers: [AuthService,  HttpService, CustomAuthService, StorageService]
+  providers: [AuthService,  HttpService, CustomAuthService, StorageService,SilentRefreshService]
 })
 export class AppComponent {
   user: any;
@@ -23,21 +27,30 @@ export class AppComponent {
   token: string;
   tokenExpiry: string;
   authTime: string;
+  idleState = 'Not started.';
+  timedOut = false;
+  lastPing?: Date = null;
 
-  constructor(private authService: AuthService, private httpService: HttpService, private customAuthService: CustomAuthService) {
+  constructor(private authService: AuthService, private httpService: HttpService, private customAuthService: CustomAuthService, 
+    silentRefreshService: SilentRefreshService) {
 
-    // Need to add check here 
+   silentRefreshService.start(22);
 
-    this.customAuthService.signinRedirectCallback().subscribe((x)=>{
-          console.log('Sign in redirect ' + x);
+
+   // TODO: Add check to see if user is currently logged in (F5)
+    this.customAuthService.signinRedirectCallback().subscribe((success)=>{
+          
+        if (success){
+        }
     });
 
-    /*
-    this.customAuthService.signinRedirectCallback().subscribe(x =>{
+ 
+  
 
-      console.log('Sign in redirect '+ x);
-    });*/
 /*
+    this.customAuthService.signinRedirectCallback().subscribe(x =>{
+      console.log('Sign in redirect '+ x);
+    });
     this.authService.mgr.getUser().then((user) => {
       if (!user) {
         this.authService.mgr.signinRedirect();
@@ -64,12 +77,17 @@ export class AppComponent {
     this.customAuthService.signinRedirect();
   }
 
+  loggedIn(){
+    this.customAuthService.loggedIn();
+  }
+
+
   signout() {
     this.authService.mgr.signoutRedirect();
   };
 
   callApi() {
-    this.httpService.get<Car>('car').subscribe(x=>{
+    this.httpService.get<Car>(environment.testApiUrl + 'car').subscribe(x=>{
       this.car =x;
     });
   };

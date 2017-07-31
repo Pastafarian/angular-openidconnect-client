@@ -6,17 +6,42 @@ import { OpenIdConfiguration } from '../config/openid.configuration';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 
+
+
 @Injectable()
 export class CustomAuthService {
 
     private openIdConfiguration: OpenIdConfiguration;
-
+ 
     constructor(private httpService: HttpService, private storageService: StorageService) {
 
     }
 
     loggedIn(): boolean {
+
+        var token = this.storageService.getItem<string>('tokenExpiry');
+        console.log('tokenExpiry ' + token);
+
+        var d = new Date(token);
+
+        console.log('tokenExpiry - dated' + d);
+        console.log(d);
+        var now = new Date();
+        console.log('now - dated' + now);
+
+        if(d < now)
+        {
+                console.log('Not logged in - expired');
+        }else
+            {
+                console.log('Logged in');
+            }
+
         return false;
+    }
+
+    public GetToken(): string {
+        return this.storageService.getItem<string>('token');
     }
 
     signinRedirect() {
@@ -78,6 +103,17 @@ export class CustomAuthService {
                 id_token = result.id_token;
                 expires_in = result.expires_in;
 
+                this.storageService.setItem("tokenExpirySecs", expires_in);
+
+                var d = new Date();
+                console.log('Date now ' + d)
+                d = new Date(d.getTime() + (expires_in * 1000));
+
+                console.log('Exp date ' + d)
+                this.storageService.setItem("tokenExpiry", d);
+                
+                console.log('expires in ' + expires_in * expires_in);
+
                 var dataIdToken: any = this.getDataFromToken(id_token);
   
                 if (dataIdToken.nonce !== this.storageService.getItem("authNonce")) {
@@ -92,7 +128,7 @@ export class CustomAuthService {
 
         if (authResponseIsValid) {
             this.setAuthorizationData(token, id_token, expires_in);
-            console.log("authorizationData", this.storageService.getItem("authorizationData"));
+            console.log("authorizationData", this.storageService.getItem("token"));
             return Observable.of(true);
         }
         else {
@@ -104,7 +140,7 @@ export class CustomAuthService {
 
     private setAuthorizationData(token: any, id_token: any, expires_in: number) {
         this.storageService.setItem('authorizationData', '');
-        this.storageService.setItem("authorizationData", token);
+        this.storageService.setItem("token", token);
         this.storageService.setItem("authorizationDataIdToken", id_token);
         var expires = new Date();
         expires.setSeconds(expires.getSeconds() + expires_in);
@@ -126,8 +162,8 @@ export class CustomAuthService {
 
 
     private resetAuthorizationData() {
-        this.storageService.setItem("authorizationData", "");
-        this.storageService.setItem("authorizationDataIdToken", "");
+        this.storageService.setItem('token', '');
+        this.storageService.setItem('authorizationDataIdToken', '');
     }
 
     private getDataFromToken(token) {

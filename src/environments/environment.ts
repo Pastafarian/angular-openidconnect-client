@@ -15,5 +15,6 @@ export const environment = {
   automaticSilentRenew: true,
   filterProtocolClaims: true,
   loadUserInfo: true,
-  testApiUrl:'http://localhost:5001/'
+  testApiUrl:'http://localhost:5001/',
+  inactiveTimeOutLimit: 15
 };

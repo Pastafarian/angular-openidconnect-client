@@ -6,6 +6,7 @@
   <button (click)="signout()">Sign out</button>
   <button (click)="callApi()">Call api</button>
   <button (click)="loadDiscoveryDocument()">Load disco</button>
+   <button (click)="loggedIn()">Logged in </button>
 </div>
 
 <div *ngIf="user">
@@ -18,3 +19,7 @@
 <div *ngIf="car">
   <pre>{{car | json}}</pre>
 </div>
+
+<p><strong>{{idleState}}</strong></p>
+<p *ngIf="lastPing"><small>Last keepalive ping <strong>{{lastPing }}</strong></small></p>
+<button (click)="reset()" *ngIf="timedOut">Restart</button>
