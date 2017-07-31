@@ -11,20 +11,20 @@ export class HttpService {
     constructor(private httpClient: HttpClient) {
     }
 
-    get<T>(url: string, token: string): Observable<T> {
-        return this.httpClient.get<T>(environment.testApiUrl + url).catch(err => this.handleError(err));
+    get<T>(url: string): Observable<T> {
+        return this.httpClient.get<T>(url).catch(err => this.handleError(err));
     }
 
     put<T>(url: string, obj: T): Observable<Response> {
-        return this.httpClient.put(environment.testApiUrl + url, JSON.stringify(obj)).catch(err => this.handleError(err));
+        return this.httpClient.put(url, JSON.stringify(obj)).catch(err => this.handleError(err));
     }
 
     post<T>(url: string, obj: T): Observable<Response> {
-        return this.httpClient.post(environment.testApiUrl + url, JSON.stringify(obj)).catch(err => this.handleError(err));
+        return this.httpClient.post(url, JSON.stringify(obj)).catch(err => this.handleError(err));
     }
 
     delete<T>(url: string): Observable<Response> {
-        return this.httpClient.delete(environment.testApiUrl + url).catch(err => this.handleError(err));
+        return this.httpClient.delete(url).catch(err => this.handleError(err));
     }
 
     private handleError(resp: HttpErrorResponse) {

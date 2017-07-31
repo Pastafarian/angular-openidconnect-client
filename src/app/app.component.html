@@ -2,8 +2,10 @@
   <h1>
     Auth Example
   </h1>
+  <button (click)="signIn()">Sign in</button> 
   <button (click)="signout()">Sign out</button>
   <button (click)="callApi()">Call api</button>
+  <button (click)="loadDiscoveryDocument()">Load disco</button>
 </div>
 
 <div *ngIf="user">
