@@ -11,8 +11,10 @@ import 'rxjs/add/observable/of';
 @Injectable()
 export class CustomAuthService {
 
+    public tokenExpiry: Date;
+    
     private openIdConfiguration: OpenIdConfiguration;
- 
+    
     constructor(private httpService: HttpService, private storageService: StorageService) {
 
     }
@@ -102,18 +104,6 @@ export class CustomAuthService {
                 token = result.access_token;
                 id_token = result.id_token;
                 expires_in = result.expires_in;
-
-                this.storageService.setItem("tokenExpirySecs", expires_in);
-
-                var d = new Date();
-                console.log('Date now ' + d)
-                d = new Date(d.getTime() + (expires_in * 1000));
-
-                console.log('Exp date ' + d)
-                this.storageService.setItem("tokenExpiry", d);
-                
-                console.log('expires in ' + expires_in * expires_in);
-
                 var dataIdToken: any = this.getDataFromToken(id_token);
   
                 if (dataIdToken.nonce !== this.storageService.getItem("authNonce")) {

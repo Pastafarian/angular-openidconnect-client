@@ -4,22 +4,21 @@ import { AuthService } from './shared/services/auth.service';
 import { CustomAuthService } from './shared/services/custom.auth.service';
 import { HttpService } from './shared/services/http.service';
 import { SilentRefreshService } from './shared/services/silent.refresh.service';
+import { SignOutIdleUserService } from './shared/services/sign.out.idle.user.service';
 import { StorageService } from './shared/services/storage.service';
 import { OpenIdConfiguration } from './shared/config/openid.configuration';
-import {NgModule} from '@angular/core';
-import { Observable} from 'rxjs/Observable';
+import { NgModule } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/do';
 import "rxjs/add/observable/interval";
-import {Idle, DEFAULT_INTERRUPTSOURCES} from '@ng-idle/core';
-import {Keepalive} from '@ng-idle/keepalive';
-
+import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
-  providers: [AuthService,  HttpService, CustomAuthService, StorageService,SilentRefreshService]
+  providers: [AuthService, HttpService, CustomAuthService, StorageService, SignOutIdleUserService, SilentRefreshService]
 })
 export class AppComponent {
   user: any;
@@ -32,70 +31,62 @@ export class AppComponent {
   lastPing?: Date = null;
 
   constructor(private authService: AuthService, private httpService: HttpService, private customAuthService: CustomAuthService, 
-    silentRefreshService: SilentRefreshService) {
+    private signOutIdleUserService: SignOutIdleUserService, silentRefreshService: SilentRefreshService) {
 
-   silentRefreshService.start(22);
+    signOutIdleUserService.init(5, 5);
 
-
-   // TODO: Add check to see if user is currently logged in (F5)
-    this.customAuthService.signinRedirectCallback().subscribe((success)=>{
-          
-        if (success){
-        }
+    signOutIdleUserService.onTimeout.subscribe(x => {
+      //this.customAuthService.signinRedirect();
+      this.idleState = 'Timed out!';
     });
 
- 
-  
-
-/*
-    this.customAuthService.signinRedirectCallback().subscribe(x =>{
-      console.log('Sign in redirect '+ x);
+    signOutIdleUserService.onTimeoutWarning.subscribe(x => {
+      this.idleState = `Idle - you will be signed out in ${x} seconds`;
     });
-    this.authService.mgr.getUser().then((user) => {
-      if (!user) {
-        this.authService.mgr.signinRedirect();
-      } else {
-        this.user = authService.currentUser;
-        this.tokenExpiry = new Date(user.expires_at * 1000).toLocaleString();
-        this.authTime = new Date(user.profile.auth_time * 1000).toLocaleString();
-        this.token = user.access_token;
+
+    signOutIdleUserService.onIdleStart.subscribe(x => {
+      this.idleState = 'Idle start';
+    });
+
+    this.customAuthService.signinRedirectCallback().subscribe((success) => {
+
+      if (success && environment.silentTokenRefresh) {
+          silentRefreshService.init();
       }
-    });*/
-    
+
+    });
   }
 
   loadDiscoveryDocument() {
     this.customAuthService.loadDiscoveryDocument().subscribe(x => {
       console.log(x);
 
-         this.customAuthService.signinRedirect();
+      this.customAuthService.signinRedirect();
     });
-     
+
   }
 
-  signIn(){
+  signIn() {
     this.customAuthService.signinRedirect();
   }
 
-  loggedIn(){
+  loggedIn() {
     this.customAuthService.loggedIn();
   }
-
 
   signout() {
     this.authService.mgr.signoutRedirect();
   };
 
   callApi() {
-    this.httpService.get<Car>(environment.testApiUrl + 'car').subscribe(x=>{
-      this.car =x;
+    this.httpService.get<Car>(environment.testApiUrl + 'car').subscribe(x => {
+      this.car = x;
     });
   };
 }
 
 
-export class Car
-{
-  public Name : string;
+export class Car {
+  public Name: string;
   public Wheels: number;
 }

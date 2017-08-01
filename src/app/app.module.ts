@@ -9,7 +9,7 @@ import { CustomAuthService } from './shared/services/custom.auth.service';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './shared/interceptors/auth.interceptor';
 import { HttpClientModule } from '@angular/common/http';
-import { NgIdleKeepaliveModule } from '@ng-idle/keepalive'; 
+import { NgIdleModule } from '@ng-idle/core'; 
 
 @NgModule({
   declarations: [
@@ -19,7 +19,7 @@ import { NgIdleKeepaliveModule } from '@ng-idle/keepalive';
     BrowserModule,
     HttpModule,
     HttpClientModule,
-    NgIdleKeepaliveModule.forRoot()
+    NgIdleModule.forRoot()
   ],
   providers: [
     AuthService, 

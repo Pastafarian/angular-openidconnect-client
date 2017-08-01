@@ -12,7 +12,7 @@ export const environment = {
   scope: "openid profile api1",
   post_logout_redirect_uri: "http://localhost:4200/index.html",
   silent_redirect_uri: 'http://localhost:4200/silent-renew.html',
-  automaticSilentRenew: true,
+  silentTokenRefresh: true,
   filterProtocolClaims: true,
   loadUserInfo: true,
   testApiUrl:'http://localhost:5001/',
