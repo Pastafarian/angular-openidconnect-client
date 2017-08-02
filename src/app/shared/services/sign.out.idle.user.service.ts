@@ -4,6 +4,10 @@ import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
 @Injectable()
 export class SignOutIdleUserService {
 
+    public onTimeoutWarning = this.idle.onTimeoutWarning;
+    public onIdleStart = this.idle.onIdleStart;
+    public onTimeout = this.idle.onTimeout;
+
     constructor(private idle: Idle) {
     }
 
@@ -13,13 +17,4 @@ export class SignOutIdleUserService {
         this.idle.setInterrupts(DEFAULT_INTERRUPTSOURCES);
         this.idle.watch();
     }
-
-    public onTimeoutWarning = this.idle.onTimeoutWarning;
-    public onIdleStart = this.idle.onIdleStart;
-    public onTimeout = this.idle.onTimeout;
 }
-
-/*
- idle.onIdleStart.subscribe(() => this.idleState = 'You\'ve gone idle!');
-    idle.onTimeoutWarning.subscribe((countdown) => this.idleState = 'You will time out in ' + countdown + ' seconds!');
-*/

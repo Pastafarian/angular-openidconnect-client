@@ -22,7 +22,7 @@ import { NgIdleModule } from '@ng-idle/core';
     NgIdleModule.forRoot()
   ],
   providers: [
-    AuthService, 
+    AuthService,
     CustomAuthService,
     StorageService,
     HttpService, {

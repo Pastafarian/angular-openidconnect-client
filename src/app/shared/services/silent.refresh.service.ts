@@ -1,50 +1,50 @@
 import { Injectable } from '@angular/core';
-import "rxjs/add/observable/interval";
+import { CustomAuthService } from './custom.auth.service';
+import { StorageService } from './storage.service';
 import { Observable } from 'rxjs/Observable';
 import { environment } from '../../../environments/environment';
-
+import 'rxjs/add/observable/timer';
 
 @Injectable()
 export class SilentRefreshService {
+    private silentRenewIFrameId = 'iFrameForSilentRenew';
 
-  private sessionIframe: any;
+    private sessionIframe: HTMLIFrameElement;
 
-  constructor() {
+    constructor(private customAuthService: CustomAuthService, private storageService: StorageService) {
 
-  }
+    }
 
-  public init() {
-    this.sessionIframe = window.document.createElement('iframe');
-    this.sessionIframe.style.display = 'none';
-    window.document.body.appendChild(this.sessionIframe);
-  }
+    public init() {
+        this.sessionIframe = <HTMLIFrameElement>window.document.getElementById(this.silentRenewIFrameId);
 
-
-  private runTokenValidatation() {
-    
-    let source = Observable.timer(3000, 3000)
-        .timeInterval()
-        .pluck('interval')
-        .take(10000);
- 
-    let subscription = source.subscribe(() => {
-        if (this._isAuthorized) {
-            if (this.oidcSecurityValidation.IsTokenExpired(this.retrieve('authorizationDataIdToken'))) {
-                console.log('IsAuthorized: isTokenExpired');
- 
-                if (this._configuration.silent_renew) {
-                    this.RefreshSession();
-                } else {
-                    this.ResetAuthorizationData();
-                }
-            }
+        if (!this.sessionIframe) {
+            this.sessionIframe = window.document.createElement('iframe');
+            this.sessionIframe.id = this.silentRenewIFrameId;
+            this.sessionIframe.style.display = 'none';
         }
-    },
-    function (err: any) {
-        console.log('Error: ' + err);
-    },
-    function () {
-        console.log('Completed');
-    });
-}
+
+        window.document.body.appendChild(this.sessionIframe);
+
+        const refreshTimer = Observable
+            .timer((this.storageService.getTokenExpirySecs() * 1000) - 10000) // Start refreshing token 10 secs before expiry
+            .subscribe(this.refreshSession);
+    }
+
+    private refreshSession() {
+        console.log('Begin refresh session Authorize');
+        this.customAuthService.setStateAndNonse();
+        const url = this.customAuthService.getSignUrl(this.storageService.getState(), this.storageService.getNonse());
+        this.startRenew(url);
+    }
+
+    public startRenew(url: string) {
+        this.sessionIframe.src = url;
+
+        return new Promise((resolve) => {
+            this.sessionIframe.onload = () => {
+                resolve();
+            };
+        });
+    }
 }

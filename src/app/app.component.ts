@@ -11,7 +11,6 @@ import { NgModule } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/do';
-import "rxjs/add/observable/interval";
 import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
 
 @Component({
@@ -30,13 +29,25 @@ export class AppComponent {
   timedOut = false;
   lastPing?: Date = null;
 
-  constructor(private authService: AuthService, private httpService: HttpService, private customAuthService: CustomAuthService, 
+  constructor(private authService: AuthService, private httpService: HttpService, private customAuthService: CustomAuthService,
     private signOutIdleUserService: SignOutIdleUserService, silentRefreshService: SilentRefreshService) {
+
+    this.customAuthService.signinRedirectCallback().subscribe((success) => {
+
+      if (success && environment.silentTokenRefresh) {
+
+        const d = new Date();
+
+        // replace
+        silentRefreshService.init();
+      }
+
+    });
 
     signOutIdleUserService.init(5, 5);
 
     signOutIdleUserService.onTimeout.subscribe(x => {
-      //this.customAuthService.signinRedirect();
+      // this.customAuthService.signinRedirect();
       this.idleState = 'Timed out!';
     });
 
@@ -47,27 +58,19 @@ export class AppComponent {
     signOutIdleUserService.onIdleStart.subscribe(x => {
       this.idleState = 'Idle start';
     });
-
-    this.customAuthService.signinRedirectCallback().subscribe((success) => {
-
-      if (success && environment.silentTokenRefresh) {
-          silentRefreshService.init();
-      }
-
-    });
   }
 
   loadDiscoveryDocument() {
     this.customAuthService.loadDiscoveryDocument().subscribe(x => {
       console.log(x);
 
-      this.customAuthService.signinRedirect();
+      this.customAuthService.signIn();
     });
 
   }
 
   signIn() {
-    this.customAuthService.signinRedirect();
+    this.customAuthService.signIn();
   }
 
   loggedIn() {
@@ -76,13 +79,13 @@ export class AppComponent {
 
   signout() {
     this.authService.mgr.signoutRedirect();
-  };
+  }
 
   callApi() {
     this.httpService.get<Car>(environment.testApiUrl + 'car').subscribe(x => {
       this.car = x;
     });
-  };
+  }
 }
 
 
