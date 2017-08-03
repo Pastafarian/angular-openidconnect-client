@@ -44,7 +44,7 @@ export class CustomAuthService {
 
     public signIn() {
         this.setStateAndNonse();
-        window.location.href = this.getSignUrl(this.storageService.getState(), this.storageService.getNonse());
+        window.location.href = this.getSignUrl(this.storageService.getState(), this.storageService.getNonse(), environment.redirect_uri);
 
     }
     public setStateAndNonse() {
@@ -55,14 +55,15 @@ export class CustomAuthService {
         this.storageService.setNonse(nonce);
     }
 
-    public getSignUrl(state: string, nonce: string) {
+    public getSignUrl(state: string, nonce: string, redirectUri: string) {
         return environment.authority + '/connect/authorize' + '?' +
             'response_type=' + encodeURI(environment.response_type) + '&' +
             'client_id=' + encodeURI(environment.client_id) + '&' +
-            'redirect_uri=' + encodeURI(environment.redirect_uri) + '&' +
+            'redirect_uri=' + encodeURIComponent(redirectUri) + '&' +
             'scope=' + encodeURI(environment.scope) + '&' +
             'nonce=' + encodeURI(nonce) + '&' +
-            'state=' + encodeURI(state);
+            'state=' + encodeURI(state) + '&' +
+            '&hash=' + new Date().getSeconds();
     }
 
     loadDiscoveryDocument(): Observable<OpenIdConfiguration> {

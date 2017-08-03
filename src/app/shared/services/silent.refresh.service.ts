@@ -8,7 +8,6 @@ import 'rxjs/add/observable/timer';
 @Injectable()
 export class SilentRefreshService {
     private silentRenewIFrameId = 'iFrameForSilentRenew';
-
     private sessionIframe: HTMLIFrameElement;
 
     constructor(private customAuthService: CustomAuthService, private storageService: StorageService) {
@@ -25,26 +24,16 @@ export class SilentRefreshService {
         }
 
         window.document.body.appendChild(this.sessionIframe);
-
+        const refreshTimeSecs = (this.storageService.getTokenExpirySecs() * 1000) - 10000;
         const refreshTimer = Observable
-            .timer((this.storageService.getTokenExpirySecs() * 1000) - 10000) // Start refreshing token 10 secs before expiry
-            .subscribe(this.refreshSession);
-    }
+            .timer(refreshTimeSecs, refreshTimeSecs) 
+            .subscribe( x => {
+                this.customAuthService.setStateAndNonse();
 
-    private refreshSession() {
-        console.log('Begin refresh session Authorize');
-        this.customAuthService.setStateAndNonse();
-        const url = this.customAuthService.getSignUrl(this.storageService.getState(), this.storageService.getNonse());
-        this.startRenew(url);
-    }
-
-    public startRenew(url: string) {
-        this.sessionIframe.src = url;
-
-        return new Promise((resolve) => {
-            this.sessionIframe.onload = () => {
-                resolve();
-            };
-        });
+                const url = this.customAuthService.getSignUrl(this.storageService.getState(), this.storageService.getNonse(),
+                environment.silent_redirect_uri);
+                console.log(url);
+                this.sessionIframe.src = url;
+            });
     }
 }

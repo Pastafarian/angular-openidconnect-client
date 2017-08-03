@@ -18,14 +18,11 @@ export class AuthInterceptor implements HttpInterceptor {
 
     const token = this.storageService.getToken();
     req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
-
-    console.log('int called');
-    console.log(token);
-
+    console.log('Intercepting with token starts ' + token.substring(0, 20));
     return next.handle(req).do(x => {}, (err: any) => {
       if (err instanceof HttpErrorResponse && err.status === 401) {
           console.log('Security exception sending request - need to sign in again');
-          // this.authService.signinRedirect(); Need to handle in a different way due to cyclic dependency 
+          // this.authService.signinRedirect(); Need to handle in a different way due to cyclic dependency
           // https://github.com/angular/angular/issues/18224
       } else {
         // Redirect to error page

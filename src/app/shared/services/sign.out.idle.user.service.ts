@@ -13,7 +13,7 @@ export class SignOutIdleUserService {
 
     public init(timeoutSeconds: number, idleSeconds: number) {
         this.idle.setIdle(idleSeconds); // Time of inactive period before user considered idle
-        this.idle.setTimeout(timeoutSeconds); // Time from idle to timeout event 
+        this.idle.setTimeout(timeoutSeconds); // Time from idle to timeout event
         this.idle.setInterrupts(DEFAULT_INTERRUPTSOURCES);
         this.idle.watch();
     }

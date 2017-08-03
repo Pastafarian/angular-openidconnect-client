@@ -9,7 +9,7 @@ import { CustomAuthService } from './shared/services/custom.auth.service';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './shared/interceptors/auth.interceptor';
 import { HttpClientModule } from '@angular/common/http';
-import { NgIdleModule } from '@ng-idle/core'; 
+import { NgIdleModule } from '@ng-idle/core';
 
 @NgModule({
   declarations: [
